@@ -3,8 +3,6 @@ ARG PYTHON_VERSION=3.12
 FROM python:${PYTHON_VERSION}-slim-bookworm AS builder
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
-ARG WEIGHTS_RELEASE=weights-v1
-ARG WEIGHTS_REPO=elad12390/gaze-correction-cam
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PIP_NO_INPUT=1 \
@@ -21,16 +19,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libx11-dev \
     libgtk-3-dev \
     libboost-python-dev \
-    curl \
-    ca-certificates \
     unzip \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build
 
 RUN pip install --upgrade pip wheel setuptools
-
-COPY pyproject.toml poetry.lock* ./
 
 RUN pip install \
     "tensorflow>=2.19.0,<3.0.0" \
@@ -41,15 +35,10 @@ RUN pip install \
     "tqdm>=4.66.0,<5.0.0"
 
 WORKDIR /weights-stage
-RUN curl -fsSL --retry 3 --retry-delay 2 \
-        -o lm_feat.zip \
-        "https://github.com/${WEIGHTS_REPO}/releases/download/${WEIGHTS_RELEASE}/lm_feat.zip" && \
-    curl -fsSL --retry 3 --retry-delay 2 \
-        -o weights.zip \
-        "https://github.com/${WEIGHTS_REPO}/releases/download/${WEIGHTS_RELEASE}/weights.zip" && \
-    unzip -oq lm_feat.zip && \
+COPY --from=weights / ./
+RUN unzip -oq lm_feat.zip && \
     unzip -oq weights.zip && \
-    rm lm_feat.zip weights.zip
+    rm -f lm_feat.zip weights.zip
 
 FROM python:${PYTHON_VERSION}-slim-bookworm AS runtime
 ARG PYTHON_VERSION=3.12
