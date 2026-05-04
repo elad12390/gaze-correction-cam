@@ -30,7 +30,6 @@ RUN pip install \
     "tensorflow>=2.19.0,<3.0.0" \
     "dlib>=19.24.8,<20.0.0" \
     "opencv-python-headless>=4.11.0.86,<5.0.0.0" \
-    "mediapipe>=0.10.32,<0.11.0" \
     "pyyaml>=6.0.3,<7.0.0" \
     "tqdm>=4.66.0,<5.0.0"
 
